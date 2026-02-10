@@ -45,6 +45,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-cov",
     "sphinx",
     "black",
     "flake8"
@@ -62,6 +63,12 @@ docs = "sphinx-build -b html ./docs ./docs/_build"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--strict-markers"
+filterwarnings = [
+    "ignore:.*vlen-utf8.*is currently not part in the Zarr format 3.*:UserWarning",
+    "ignore:.*StringDType.*is currently not part in the Zarr format 3.*:UserWarning",
+    "ignore:.*Consolidated metadata is currently not part in the Zarr.*:UserWarning",
+    "ignore:Country.output is deprecated:DeprecationWarning",
+]
 
 [tool.black]
 line-length = 79

@@ -1,11 +1,11 @@
 """Run script for InSEEDS with LPJmL coupling"""
 
 from pycoupler.config import read_config
-from pycoupler.run import run_lpjml, check_lpjml
+from pycoupler.run import start_lpjml, check_lpjml
 from pycoupler.coupler import LPJmLCoupler
 from pycoupler.utils import search_country
 
-from inseeds.models.regenerative_tillage import Model  # noqa
+from inseeds.realisations.regenerative_tillage import Model  # noqa
 
 # Settings ================================================================== #
 
@@ -13,7 +13,7 @@ from inseeds.models.regenerative_tillage import Model  # noqa
 sim_path = "./simulations"
 model_path = "./LPJmL"
 inseeds_config_file = (
-    "./inseeds/models/regenerative_tillage/config.yaml"  # noqa"
+    "./inseeds/realisations/regenerative_tillage/config.yaml"  # noqa"
 )
 
 # search for country code by supplying country name
@@ -80,7 +80,7 @@ config_coupled_fn = config_coupled.to_json()
 check_lpjml(config_coupled_fn)
 
 # run lpjml simulation for coupling in the background
-run_lpjml(
+start_lpjml(
     config_file=config_coupled_fn,
     std_to_file=False,  # write stdout and stderr to file
 )

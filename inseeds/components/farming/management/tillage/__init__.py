@@ -1,1 +1,0 @@
-from .farmer import Farmer

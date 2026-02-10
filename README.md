@@ -16,12 +16,12 @@ inherits the entity and taxonomy system introduced for the
 [copan:CORE framework](https://doi.org/10.5194/esd-11-395-2020).
 
 
-### [Models](./inseeds/models)
+### [Realisations](./inseeds/realisations)
 
-InSEEDS provides multiple model classes which can be used to simulate different
+InSEEDS provides multiple realisation classes which can be used to simulate different
 aspects of the social-ecological system, depending how the model is build and
 configured.  
-**regenerative_tillage** is the first model implementation that simulates the
+**regenerative_tillage** is the first realisation implementation that simulates the
 potential spreading of conservation tillage over conventional tillage in a
 simplified farmer decision making model system.  
 
@@ -38,7 +38,7 @@ up the world.
 
 [components/farming](./inseeds/components/farming) holds all farming components
 that are used to simulate the direct agricultural part of the model.  
-[components/farming/management/tillage](./inseeds/components/farming/management/tillage)
+[components/farming/tillage_farmer](./inseeds/components/farming/tillage_farmer.py)
 is a subcomponent of farming that focuses solely on the tillage management in
 the agricultural system.  
 Each subcomponent has various entities again, for example the farmer entity,

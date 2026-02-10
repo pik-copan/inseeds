@@ -1,13 +1,7 @@
 """Run script for InSEEDS with LPJmL coupling"""
 
-import os
-import numpy as np  # which is usually needed
-
 from pycoupler.config import read_config
-from pycoupler.run import run_lpjml, check_lpjml
-from pycoupler.coupler import LPJmLCoupler
-from pycoupler.utils import search_country
-
+from pycoupler.run import start_lpjml, check_lpjml
 
 # Settings ================================================================== #
 
@@ -74,10 +68,10 @@ config_historic_fn = config_historic.to_json()
 check_lpjml(config_file=config_spinup_fn)
 
 # run spinup job
-run_lpjml(config_file=config_spinup_fn)
+start_lpjml(config_file=config_spinup_fn)
 
 # check if everything is set correct
 check_lpjml(config_historic_fn)
 
 # run spinup job
-run_lpjml(config_file=config_historic_fn)
+start_lpjml(config_file=config_historic_fn)

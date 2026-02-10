@@ -3,11 +3,9 @@
 import pickle
 
 from pycoupler.config import read_config
-from pycoupler.run import run_lpjml, check_lpjml
-from pycoupler.coupler import LPJmLCoupler
-from pycoupler.utils import search_country
+from pycoupler.run import start_lpjml, check_lpjml
 
-from inseeds.models.regenerative_tillage import Model  # noqa
+from inseeds.realisations.regenerative_tillage import Model  # noqa
 
 # Settings ================================================================== #
 
@@ -15,7 +13,7 @@ from inseeds.models.regenerative_tillage import Model  # noqa
 sim_path = "./simulations"
 model_path = "./LPJmL"
 inseeds_config_file = (
-    "./inseeds/models/regenerative_tillage/config.yaml"  # noqa"
+    "./inseeds/realisations/regenerative_tillage/config.yaml"  # noqa"
 )
 
 # search for country code by supplying country name
@@ -84,7 +82,7 @@ config_coupled_fn = config_coupled.to_json()
 check_lpjml(config_coupled_fn)
 
 # run lpjml simulation for coupling in the background
-run_lpjml(
+start_lpjml(
     config_file=config_coupled_fn,
     std_to_file=False,  # write stdout and stderr to file
 )
@@ -98,10 +96,10 @@ model.lpjml.config.to_json("./inseeds/tests/data/config.json")
 
 # write input and output data to pickle files
 with open("./inseeds/tests/data/lpjml_input.pkl", "wb") as outp:
-    pickle.dump(model.world.input, outp, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(model.world.to_earth, outp, pickle.HIGHEST_PROTOCOL)
 
 with open("./inseeds/tests/data/lpjml_output.pkl", "wb") as outp:
-    pickle.dump(model.world.output, outp, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(model.world.from_earth, outp, pickle.HIGHEST_PROTOCOL)
 
 with open("./inseeds/tests/data/lpjml.pkl", "wb") as lpj:
     pickle.dump(model.lpjml, lpj, pickle.HIGHEST_PROTOCOL)

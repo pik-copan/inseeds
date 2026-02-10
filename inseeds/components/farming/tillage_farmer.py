@@ -1,12 +1,12 @@
-"""Farmer entity type class of inseeds_farmer_management"""
+"""Tillage farmer with TPB-based tillage decisions."""
 
 import numpy as np
 
-from inseeds.components import farming
+from inseeds.components.farming.farmer import Farmer
 
 
-class Farmer(farming.Farmer):
-    """Farmer (Individual) entity type mixin class."""
+class TillageFarmer(Farmer):
+    """Farmer with TPB-based tillage/conservation tillage decisions."""
 
     def __init__(self, **kwargs):
         """Initialize an instance of Farmer."""
@@ -141,10 +141,14 @@ class Farmer(farming.Farmer):
         return first_var, second_var
 
     def update(self, t):
+        """Update the behaviour of the farmer based on the TPB"""
+
         # call the base class update method
         super().update(t)
 
-        """Update the behaviour of the farmer based on the TPB"""
+        # no farmer actions in the control run
+        if self.control_run:
+            return
 
         # If strategy switch time is down to 0 calculate TPB-based strategy
         # switch probability value

@@ -1,0 +1,105 @@
+model: "InSEEDS"
+
+# Settings for LPJmL specifically for coupling (pycoupler)
+#   (not covered by LPJmL's direct config)
+lpjml_settings:
+    # Convert country codes to readable names (uses ISO country codes)
+    country_code_to_name: true
+
+# Parallelization settings for pycopanlpjml
+parallelization:
+    # Maximum number of workers to use (0 = auto-detect from SLURM_CPUS_ON_NODE or CPU count)
+    max_workers: 0
+    
+    # Enable debug output for parallelization
+    debug: false
+    
+    # Parallelization mode ('auto', 'dask', 'mpi', 'serial')
+    # 'auto' = auto-detect (tries Dask first, then MPI, then serial)
+    # 'dask' = use Dask distributed (for HPC clusters)
+    # 'mpi' = reuse LPJmL's MPI processes (recommended if LPJmL uses MPI)
+    # 'serial' = force serial execution
+    mode: 'dask' # 'auto'
+
+# Profiling settings for pycopanlpjml
+profiling:
+    # Enable PyInstrument profiling for the driver (main) process
+    # Generates HTML profile at: {output_dir}/profiling/profiling_main_{timestamp}.html
+    driver: false
+
+    # Enable worker-side profiling (Dask performance report + PyInstrument plugin)
+    # Generates:
+    # - Dask performance report: {output_dir}/profiling/dask_workers_{timestamp}.html
+    # - Per-worker profiles: {output_dir}/profiling/workers/worker_{name}_{timestamp}.html
+    workers: false
+
+# Output collection settings for pycopanlpjml
+# All settings from pycopanlpjml/config.yaml are explicitly listed here
+output:
+    # Output formats to write (after simulation completes)
+    # If empty list [], no outputs will be written
+    # Options: "netcdf", "parquet", "csv"
+    # - NetCDF: Recommended for scientific analysis (fastest, CF-compliant)
+    # - Parquet: Good for data analysis (columnar, compressed)
+    # - CSV: Human-readable, good for small runs (slowest)
+    format: ["netcdf", "csv"]  # or ["csv"], ["parquet"], ["netcdf"], []
+
+    # Variables to be written to output files
+    # This defines which entity-level variables should be collected and written
+    # Format: {entity_type}: [list of variable names]
+    # Variables must be defined in the entity's output_variables class attribute
+    # Entity types: world, country, cell, farmer (or individual)
+    # Entity type names are derived from class names (lowercased):
+    # - World -> "world"
+    # - Country -> "country"
+    # - Cell -> "cell"
+    # - Farmer -> "farmer" (also accepts "individual" as alias)
+    # Farmer-level variables (Farmer class uses 'farmer' as entity type)
+    farmer:
+        - "aft_id"
+        - "tillage"
+        - "tpb"
+        - "pbc"
+        - "social_norm"
+        - "attitude"
+        - "attitude_own_land"
+        - "attitude_social_learning"
+        - "soilc"
+        - "cropyield"
+
+# Define which farmer variables map with coupled LPJmL input variables
+coupling_map:
+    tillage: ["with_tillage"]
+    # residues: ["residue_on_field"]
+
+control_run: False
+pioneer_share: 0.25
+
+# Analogous to LPJmL pftpar, define the AFT parameters for the two different
+#   farmer types
+aftpar:
+    # AFT for conservative/traditional values following farmer tending to stay
+    #   with conventional agriculture
+    traditionalist:
+        pbc: 0.75
+        weight_attitude: 0.6
+        weight_yield: 0.8
+        weight_soil: 0.4
+        weight_norm: 0.4
+        weight_social_learning: 0.4
+        weight_own_land: 0.6
+        # duration of waiting time before switching to another strategy
+        strategy_switch_duration: 10 # years
+
+    # AFT for pioneer farmer who more likely tends to switch to new (promising)
+    #   regenerative agriculture practices
+    pioneer:
+        pbc: 0.95
+        weight_attitude: 0.8
+        weight_yield: 0.4
+        weight_soil: 0.8
+        weight_norm: 0.2
+        weight_social_learning: 0.6
+        weight_own_land: 0.4
+        # duration of waiting time before switching to another strategy
+        strategy_switch_duration: 10 # years

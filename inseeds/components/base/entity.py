@@ -1,66 +1,29 @@
-import pandas as pd
-from . import Output
+"""Entity base class - functionality migrated to pycopanlpjml."""
+
+from pycopanlpjml.output import OutputDefinitionMixin
 
 
-class Entity:
-    """Define properties.
-    Inherits from I.World as the interface with all necessary variables
-    and parameters.
+class Entity(OutputDefinitionMixin):
+    """Define properties - functionality migrated to pycopanlpjml.
+
+    Inherits from pycopanlpjml's OutputDefinitionMixin to get default
+    get_defined_outputs() implementation. The config key is determined
+    from the entity class name (e.g., 'Farmer' -> 'farmer',
+    'Consumer' -> 'consumer').
     """
 
-    output_variables = Output()
-
     def __init__(self, model=None):
-        """Initialize an instance of World."""
         self.model = model
 
     @property
-    def output_table(self):
-        variables = self.get_defined_outputs()
-        if not variables:
-            return pd.DataFrame()
-        else:
-            return pd.DataFrame(
-                {
-                    "year": [self.model.lpjml.sim_year] * len(variables),
-                    "entity": [self.__class__.__name__] * len(variables),
-                    "variable": [
-                        getattr(
-                            getattr(
-                                self.__class__.output_variables, var, None
-                            ),
-                            "name",
-                            None,
-                        )
-                        for var in variables
-                    ],
-                    "value": [getattr(self, var, None) for var in variables],
-                    "unit": [
-                        getattr(
-                            getattr(
-                                getattr(
-                                    self.__class__.output_variables, var, None
-                                ),
-                                "unit",
-                                None,
-                            ),
-                            "symbol",
-                            None,
-                        )
-                        for var in variables
-                    ],
-                }
-            )
+    def model(self):
+        """Reference to the Model instance."""
+        return self._model if hasattr(self, "_model") else None
 
-    def get_defined_outputs(self):
-        return [
-            var
-            for var in self.__class__.output_variables.names
-            if var
-            in self.model.config.coupled_config.output.to_dict()[
-                self.__class__.__name__.lower()
-            ]
-        ]
+    @model.setter
+    def model(self, value):
+        """Set the model reference."""
+        self._model = value
 
     def update(self, t):
         pass

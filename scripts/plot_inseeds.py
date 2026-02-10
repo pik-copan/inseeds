@@ -2,7 +2,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 output_path = "./simulations/output/coupled_test/"
 
 all_output = pd.read_csv(f"{output_path}/inseeds.csv")

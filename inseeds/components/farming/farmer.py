@@ -9,6 +9,7 @@
 # Contact: core@pik-potsdam.de
 # License: BSD 2-clause license
 import numpy as np
+import time
 from enum import Enum
 
 import pycopancore.model_components.base as core
@@ -87,9 +88,11 @@ class Farmer(core.Individual, base.Individual):
                 lpjml_attribute = [lpjml_attribute]
 
             for single_var in lpjml_attribute:
-                if len(self.cell.input[single_var].values.flatten()) > 1:
+                input_data = self.cell.to_earth[single_var].values
+
+                if len(input_data.flatten()) > 1:
                     continue
-                setattr(self, attribute, self.cell.input[single_var].item())
+                setattr(self, attribute, input_data.item())
 
     def init_neighbourhood(self):
         """Initialize the neighbourhood of the agent."""
@@ -101,52 +104,73 @@ class Farmer(core.Individual, base.Individual):
         ]
 
     @property
-    def farmers(self):
-        """Return the set of all farmers in the neighbourhood."""
-        return self.individuals
-
-    @property
     def cell_cropyield(self):
         """Return the average crop yield of the cell."""
-        if self.cell.output.harvestc.values.mean() == 0:
+        harvestc_data = self.cell.from_earth.harvestc.values
+        if harvestc_data.mean() == 0:
             return 1e-3
         else:
-            return self.cell.output.harvestc.values.mean()
+            return harvestc_data.mean()
 
     @property
     def cell_soilc(self):
         """Return the average soil carbon of the cell."""
-        if self.cell.output.soilc_agr_layer.values[0].item() == 0:
+        top_soilc_data = self.cell.from_earth.soilc_agr_layer.isel(
+            band=0
+        ).item()
+        if top_soilc_data == 0:
             return 1e-3
         else:
-            return self.cell.output.soilc_agr_layer.values[0].item()
+            return top_soilc_data
 
     @property
     def cell_avg_hdate(self):
         """Return the average harvest date of the cell."""
-        check = self.cell.output.hdate.band.values
-        crop_idx = [
+        hdate_data = self.cell.from_earth.hdate
+        cftfrac_data = self.cell.from_earth.cftfrac
+
+        # Get band values for both variables
+        hdate_bands = hdate_data.band.values
+        cftfrac_bands = cftfrac_data.band.values
+
+        # Find crop indices in hdate bands that match cftmap
+        hdate_crop_idx = [
             i
-            for i, item in enumerate(self.cell.output.hdate.band.values)
+            for i, item in enumerate(hdate_bands)
             if any(x in item for x in self.model.config.cftmap)
         ]
-        if np.sum(self.cell.output.cftfrac.isel(band=crop_idx).values) == 0:
+
+        # Find matching bands in cftfrac (same crop names)
+        hdate_crop_names = [hdate_bands[i] for i in hdate_crop_idx]
+        cftfrac_crop_idx = [
+            i
+            for i, item in enumerate(cftfrac_bands)
+            if item in hdate_crop_names
+        ]
+
+        if len(cftfrac_crop_idx) == 0:
+            return 365
+
+        # Get the selected data
+        hdate_selected = hdate_data.isel(band=hdate_crop_idx)
+        cftfrac_selected = cftfrac_data.isel(band=cftfrac_crop_idx)
+
+        if np.sum(cftfrac_selected.values) == 0:
             return 365
         else:
             return np.average(
-                self.cell.output.hdate,
-                weights=self.cell.output.cftfrac.isel(band=crop_idx),
+                hdate_selected.values, weights=cftfrac_selected.values
             )
 
     def set_lpjml(self, attribute):
-        """Set the mapped variables from the farmers to the LPJmL input"""
+        """Set the mapped variables from the farmers to the LPJmL input."""
         lpjml_attribute = self.coupling_map[attribute]
 
         if not isinstance(lpjml_attribute, list):
             lpjml_attribute = [lpjml_attribute]
 
         for single_var in lpjml_attribute:
-            self.cell.input[single_var][:] = getattr(self, attribute)
+            self.cell.to_earth[single_var][:] = getattr(self, attribute)
 
     def update(self, t):
         super().update(t)
@@ -164,6 +188,3 @@ class Farmer(core.Individual, base.Individual):
             (1 - 1 / self.strategy_switch_duration) * self.soilc
             + 1 / self.strategy_switch_duration * self.cell_soilc
         )
-
-        if self.control_run:
-            return

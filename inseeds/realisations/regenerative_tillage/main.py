@@ -2,7 +2,7 @@ import os
 import argparse
 
 from pycoupler.coupler import LPJmLCoupler
-from inseeds.models.regenerative_tillage import Model
+from inseeds.realisations.regenerative_tillage import Model
 
 
 def run_inseeds(config_file):

@@ -19,3 +19,14 @@ class World(base.World):
             if farmer.__class__.__name__ == "Farmer"  # noqa
         }
         return farmers
+
+    def update(self, t):
+        """Update all farmers (for models without countries)."""
+        super().update(t)
+
+        # Update farmers sorted by harvest date
+        farmers_sorted = sorted(
+            self.farmers, key=lambda farmer: farmer.avg_hdate
+        )
+        for farmer in farmers_sorted:
+            farmer.update(t)
