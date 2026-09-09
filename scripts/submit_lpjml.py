@@ -6,9 +6,12 @@ from pycoupler.utils import search_country
 
 # Settings ================================================================== #
 
+import pathlib
+runscript_folder = pathlib.Path(__file__).parent.resolve()
+
 # paths
-sim_path = "./simulations"
-model_path = "/LPJmL"
+sim_path = f"{runscript_folder}/simulations"
+model_path = f"{runscript_folder}/LPJmL"
 
 
 # Configuration ============================================================= #
@@ -61,10 +64,19 @@ config_historic_fn = config_historic.to_json()
 check_lpjml(config_spinup_fn)
 
 # run spinup job
-submit_lpjml(config_file=config_spinup_fn, wtime="1:00:00", ntasks=512)
+spinup_job_id = submit_lpjml(
+    config_file=config_spinup_fn,
+    wtime="1:00:00",
+    ntasks=512
+)
 
 # check if everything is set correct
 check_lpjml(config_historic_fn)
 
 # run spinup job
-submit_lpjml(config_file=config_historic_fn, wtime="0:30:00", ntasks=512)
+submit_lpjml(
+    config_file=config_historic_fn,
+    wtime="0:30:00",
+    ntasks=512,
+    dependency=spinup_job_id
+)

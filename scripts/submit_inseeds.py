@@ -2,17 +2,20 @@
 
 from pycoupler.config import read_config
 from pycoupler.run import check_lpjml, submit_lpjml
+import sys
 
 
 # Settings ================================================================== #
 
-# paths
-sim_path = "./simulations"
-model_path = "./LPJmL"
-inseeds_config_file = (
-    "./inseeds/inseeds/models/regenerative_tillage/config.yaml"  # noqa"
-)
+import pathlib
+runscript_folder = pathlib.Path(__file__).parent.resolve()
 
+# paths
+sim_path = f"{runscript_folder}/simulations"
+model_path = f"{runscript_folder}/LPJmL"
+inseeds_config_file = (
+    f"{runscript_folder}/inseeds/models/regenerative_tillage/config.yaml"  # noqa"
+)
 
 # Configuration ============================================================= #
 
@@ -31,12 +34,11 @@ config_coupled.set_coupled(
     coupled_year=2023,
     coupled_input=["with_tillage"],
     coupled_output=[
-        "soilc_agr_layer_fast",
+        "soilc_agr_layer",
         "cftfrac",
-        "pft_harvestc",
+        "harvestc",
         "hdate",
         "country",
-        "region",
         "terr_area",
     ],
 )
@@ -54,8 +56,6 @@ config_coupled.fix_climate_year = 2013
 config_coupled.tillage_type = "read"
 config_coupled.residue_treatment = "read_residue_data"
 
-config_coupled.double_harvest = False
-
 config_coupled.add_config(inseeds_config_file)
 
 # write config (Config object) as json file
@@ -70,6 +70,7 @@ check_lpjml(config_coupled_fn)
 # run lpjml simulation for coupling in the background
 submit_lpjml(
     config_file=config_coupled_fn,
-    couple_to="./inseeds/models/farmer_management/main.py",
+    couple_to=f"{runscript_folder}/inseeds/inseeds/models/regenerative_tillage/main.py",
+    venv_path=sys.prefix,
     wtime="5:00:00",
 )

@@ -4,16 +4,19 @@ import os
 import numpy as np  # which is usually needed
 
 from pycoupler.config import read_config
-from pycoupler.run import run_lpjml, check_lpjml
+from pycoupler.run import operate_lpjml, check_lpjml
 from pycoupler.coupler import LPJmLCoupler
 from pycoupler.utils import search_country
 
 
 # Settings ================================================================== #
 
+import pathlib
+runscript_folder = pathlib.Path(__file__).parent.resolve()
+
 # paths
-sim_path = "./simulations"
-model_path = "./LPJmL"
+sim_path = f"{runscript_folder}/simulations"
+model_path = f"{runscript_folder}/LPJmL"
 
 spinup = True
 
@@ -74,10 +77,10 @@ config_historic_fn = config_historic.to_json()
 check_lpjml(config_file=config_spinup_fn)
 
 # run spinup job
-run_lpjml(config_file=config_spinup_fn)
+operate_lpjml(config_file=config_spinup_fn)
 
 # check if everything is set correct
 check_lpjml(config_historic_fn)
 
 # run spinup job
-run_lpjml(config_file=config_historic_fn)
+operate_lpjml(config_file=config_historic_fn)

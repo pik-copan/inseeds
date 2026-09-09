@@ -9,11 +9,14 @@ from inseeds.models.regenerative_tillage import Model  # noqa
 
 # Settings ================================================================== #
 
+import pathlib
+runscript_folder = pathlib.Path(__file__).parent.resolve()
+
 # paths
-sim_path = "./simulations"
-model_path = "./LPJmL"
+sim_path = f"{runscript_folder}/simulations"
+model_path = f"{runscript_folder}/LPJmL"
 inseeds_config_file = (
-    "./inseeds/models/regenerative_tillage/config.yaml"  # noqa"
+    f"{runscript_folder}/inseeds/models/regenerative_tillage/config.yaml"  # noqa"
 )
 
 # search for country code by supplying country name
